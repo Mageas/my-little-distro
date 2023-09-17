@@ -9,8 +9,6 @@ declare -A MLD_FLATPAKS
 declare -A MLD_CACHE_PACKAGES
 declare -A MLD_CACHE_AUR_PACKAGES
 declare -A MLD_CACHE_FLATPAKS
-PACKAGES_PATH=()
-CACHES_PATH=()
 
 # Clear variables
 # If variables are not cleared, it can be reused
@@ -77,7 +75,6 @@ function indexing_packages {
         [[ "${ENABLE}" != true ]] && continue
 
         remove_parent_directory "${file}" "${MLD_PACKAGES_DIR}"
-        PACKAGES_PATH+=(${return_remove_parent_directory})
 
         set_value "MLD_PACKAGES" "pkgs" "${return_remove_parent_directory}" "${PACKAGES[@]}"
         set_value "MLD_PACKAGES" "deps" "${return_remove_parent_directory}" "${DEPENDENCIES[@]}"

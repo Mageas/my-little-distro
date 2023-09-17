@@ -5,10 +5,10 @@ MLD_CACHE_DIR=".cache_packages"
 
 declare -A MLD_PACKAGES
 declare -A MLD_AUR_PACKAGES
-declare -A MLD_FLATPAK
+declare -A MLD_FLATPAKS
 declare -A MLD_CACHE_PACKAGES
 declare -A MLD_CACHE_AUR_PACKAGES
-declare -A MLD_CACHE_FLATPAK
+declare -A MLD_CACHE_FLATPAKS
 PACKAGES_PATH=()
 CACHES_PATH=()
 
@@ -83,42 +83,43 @@ function indexing_packages {
         set_value "MLD_PACKAGES" "deps" "${return_remove_parent_directory}" "${DEPENDENCIES[@]}"
         set_value "MLD_AUR_PACKAGES" "pkgs" "${return_remove_parent_directory}" "${AUR_PACKAGES[@]}"
         set_value "MLD_AUR_PACKAGES" "deps" "${return_remove_parent_directory}" "${AUR_DEPENDENCIES[@]}"
-        set_value "MLD_FLATPAK" "pkgs" "${return_remove_parent_directory}" "${FLATPAK_PACKAGES[@]}"
-        set_value "MLD_FLATPAK" "deps" "${return_remove_parent_directory}" "${FLATPAK_DEPENDENCIES[@]}"
+        set_value "MLD_FLATPAKS" "pkgs" "${return_remove_parent_directory}" "${FLATPAK_PACKAGES[@]}"
+        set_value "MLD_FLATPAKS" "deps" "${return_remove_parent_directory}" "${FLATPAK_DEPENDENCIES[@]}"
     done < <(find ${MLD_PACKAGES_DIR} -type f -print0)
 }
 
 # Save the indexed packages
-# PACKAGES are saved in CACHE_CONFIG
-# AUR PACKAGES are saved in CACHE_AUR_CONFIG
-# FLATPAK are saved in CACHE_FLATPAK_CONFIG
+# PACKAGES are saved in CONFIG_CACHE_PACKAGES
+# AUR PACKAGES are saved in CONFIG_CACHE_AUR_PACKAGES
+# FLATPAK are saved in CONFIG_CACHE_FLATPAKS
 function save_indexing_cache {
-    local _output="#!/bin/bash\ndeclare -A CACHE_CONFIG"
+    local _output="#!/bin/bash\ndeclare -A CONFIG_CACHE_PACKAGES"
     for key in "${!MLD_PACKAGES[@]}"; do
-        [[ ! -z "${MLD_PACKAGES[$key]}" ]] && _output+="\nCACHE_CONFIG[${key}]=\"${MLD_PACKAGES[$key]}\""
+        [[ ! -z "${MLD_PACKAGES[$key]}" ]] && _output+="\nCONFIG_CACHE_PACKAGES[${key}]=\"${MLD_PACKAGES[$key]}\""
     done
-    _output+="\ndeclare -A CACHE_AUR_CONFIG"
+    _output+="\ndeclare -A CONFIG_CACHE_AUR_PACKAGES"
     for key in "${!MLD_AUR_PACKAGES[@]}"; do
-        [[ ! -z "${MLD_AUR_PACKAGES[$key]}" ]] && _output+="\nCACHE_AUR_CONFIG[${key}]=\"${MLD_AUR_PACKAGES[$key]}\""
+        [[ ! -z "${MLD_AUR_PACKAGES[$key]}" ]] && _output+="\nCONFIG_CACHE_AUR_PACKAGES[${key}]=\"${MLD_AUR_PACKAGES[$key]}\""
     done
-    _output+="\ndeclare -A CACHE_FLATPAK_CONFIG"
-    for key in "${!MLD_FLATPAK[@]}"; do
-        [[ ! -z "${MLD_FLATPAK[$key]}" ]] && _output+="\nCACHE_FLATPAK_CONFIG[${key}]=\"${MLD_FLATPAK[$key]}\""
+    _output+="\ndeclare -A CONFIG_CACHE_FLATPAKS"
+    for key in "${!MLD_FLATPAKS[@]}"; do
+        [[ ! -z "${MLD_FLATPAKS[$key]}" ]] && _output+="\nCONFIG_CACHE_FLATPAKS[${key}]=\"${MLD_FLATPAKS[$key]}\""
     done
     echo -e "${_output}" >"${MLD_CACHE_DIR}"
 }
 
 # Index the cache
 function indexing_cache {
+    [[ ! -f "${MLD_CACHE_DIR}" ]] && return
     source "${MLD_CACHE_DIR}"
-    for key in "${!CACHE_CONFIG[@]}"; do
-        MLD_CACHE_PACKAGES[$key]="${CACHE_CONFIG[$key]}"
+    for key in "${!CONFIG_CACHE_PACKAGES[@]}"; do
+        MLD_CACHE_PACKAGES[$key]="${CONFIG_CACHE_PACKAGES[$key]}"
     done
-    for key in "${!CACHE_AUR_CONFIG[@]}"; do
-        MLD_CACHE_AUR_PACKAGES[$key]="${CACHE_AUR_CONFIG[$key]}"
+    for key in "${!CONFIG_CACHE_AUR_PACKAGES[@]}"; do
+        MLD_CACHE_AUR_PACKAGES[$key]="${CONFIG_CACHE_AUR_PACKAGES[$key]}"
     done
-    for key in "${!CACHE_FLATPAK_CONFIG[@]}"; do
-        MLD_CACHE_FLATPAK[$key]="${CACHE_FLATPAK_CONFIG[$key]}"
+    for key in "${!CONFIG_CACHE_FLATPAKS[@]}"; do
+        MLD_CACHE_FLATPAKS[$key]="${CONFIG_CACHE_FLATPAKS[$key]}"
     done
 }
 
@@ -136,7 +137,7 @@ echo "aur pkgs del diff: ${return_count_array[@]}"
 get_array_diff "MLD_CACHE_AUR_PACKAGES" "MLD_AUR_PACKAGES"
 echo "aur pkgs ins diff: ${return_count_array[@]}"
 
-get_array_diff "MLD_FLATPAK" "MLD_CACHE_FLATPAK"
+get_array_diff "MLD_FLATPAKS" "MLD_CACHE_FLATPAKS"
 echo "flatpak del diff: ${return_count_array[@]}"
-get_array_diff "MLD_CACHE_FLATPAK" "MLD_FLATPAK"
+get_array_diff "MLD_CACHE_FLATPAKS" "MLD_FLATPAKS"
 echo "flatpak ins diff: ${return_count_array[@]}"

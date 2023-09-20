@@ -127,12 +127,15 @@ function install_dotfiles {
             ERROR "[install_dotfiles]: Unable to install sysfiles"
 
         for _directory in $(ls -p | grep /); do
-            local _conflits=$(stow --no --verbose ${_directory} 2>&1 | awk '/\* existing target is/ {print $NF}')
-            for _f in ${_conflits[@]}; do
-                # TODO: Copy the file to the 'MLD_INSTALL_PATH/backup' directory
-                LOG "[install_dotfiles]: Removing file '/${_f}'"
-                [[ -f "/${_f}" || -L "/${_f}" ]] && sudo rm "/${_f}"
-            done
+            while IFS= read -r _line; do
+                local _file=$(echo ${_line} | grep -oP 'existing target is neither a link nor a directory: \K.*')
+                [[ -z "${_file}" ]] && continue
+                local _dir=$(dirname "${_file}")
+                mkdir -p "${MLD_INSTALL_PATH}/backup/${_dir}"
+                cp "/${_file}" "${MLD_INSTALL_PATH}/backup/${_file}"
+                LOG "[install_dotfiles]: Backup file '${MLD_INSTALL_PATH}/backup/${_file}' and remove the original at '/${_file}'"
+                sudo rm "/${_file}"
+            done <<<"$(stow --no --verbose ${_directory} 2>&1)"
         done
         sudo stow -R */ ||
             ERROR "[install_dotfiles]: Unable to install sysfiles"

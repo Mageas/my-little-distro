@@ -10,6 +10,10 @@ declare -A MLD_CACHE_PACKAGES
 declare -A MLD_CACHE_AUR_PACKAGES
 declare -A MLD_CACHE_FLATPAKS
 
+# Update working directory to this script path
+MLD_SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+cd "${MLD_SCRIPT_DIR}"
+
 # Clear variables
 # If variables are not cleared, it can be reused
 function clear_vars {
@@ -126,21 +130,23 @@ save_indexing_cache
 
 # Packages to remove
 get_array_diff "MLD_PACKAGES" "MLD_CACHE_PACKAGES"
-echo "pkgs del diff: ${return_count_array[@]}"
+MLD_OUTPUT_PACKAGES_REMOVE="${return_count_array[@]}"
 # Packages to install
 get_array_diff "MLD_CACHE_PACKAGES" "MLD_PACKAGES"
-echo "pkgs ins diff: ${return_count_array[@]}"
+MLD_OUTPUT_PACKAGES_INSTALL="${return_count_array[@]}"
 
 # Aur packages to remove
 get_array_diff "MLD_AUR_PACKAGES" "MLD_CACHE_AUR_PACKAGES"
-echo "aur pkgs del diff: ${return_count_array[@]}"
+MLD_OUTPUT_AUR_PACKAGES_REMOVE="${return_count_array[@]}"
 # Aur packages to install
 get_array_diff "MLD_CACHE_AUR_PACKAGES" "MLD_AUR_PACKAGES"
-echo "aur pkgs ins diff: ${return_count_array[@]}"
+MLD_OUTPUT_AUR_PACKAGES_INSTALL="${return_count_array[@]}"
 
 # Flatpaks to remove
 get_array_diff "MLD_FLATPAKS" "MLD_CACHE_FLATPAKS"
-echo "flatpak del diff: ${return_count_array[@]}"
+MLD_OUTPUT_FLATPAKS_REMOVE="${return_count_array[@]}"
 # Flatpaks to install
 get_array_diff "MLD_CACHE_FLATPAKS" "MLD_FLATPAKS"
-echo "flatpak ins diff: ${return_count_array[@]}"
+MLD_OUTPUT_FLATPAKS_INSTALL="${return_count_array[@]}"
+
+return 0

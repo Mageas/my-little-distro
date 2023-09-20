@@ -99,7 +99,7 @@ function install_packages {
 
         # Install pacman packages
         if [[ "${MLD_OUTPUT_PACKAGES_INSTALL[@]}" != "" ]]; then
-            sudo pacman -S --needed --noconfirm "${MLD_OUTPUT_PACKAGES_INSTALL[@]}" ||
+            sudo pacman -S --needed --noconfirm ${MLD_OUTPUT_PACKAGES_INSTALL[@]} ||
                 ERROR "[install_packages]: Unable to install '${MLD_OUTPUT_PACKAGES_INSTALL[@]}' form pacman"
         fi
         # Install aur packages

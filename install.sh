@@ -161,4 +161,4 @@ init_script
 install_packages
 install_dotfiles
 config_fstab
-custom_scripts
+post_install
